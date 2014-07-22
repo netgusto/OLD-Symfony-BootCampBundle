@@ -14,6 +14,11 @@ use Symfony\Component\DependencyInjection\Loader;
  */
 class NetgustoBootCampExtension extends Extension
 {
+    public function prepend(ContainerBuilder $container) {
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('distribution.yml');
+    }
+    
     /**
      * {@inheritDoc}
      */
