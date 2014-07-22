@@ -3,12 +3,12 @@ parameters:
 
 services:
 
-    bootcamp.autoroute:
+    bootcamp.init.autoroute:
         class: Netgusto\AutorouteBundle\Routing\AutorouteProvider
         arguments:
-            - "@""BootCampBundle/Resources/config/routes/init.yml"
+            - "\@NetgustoBootCampBundle/Resources/config/routes/init.yml"
         tags:
-            - { name: autoroute.provider }
+            - { name: autoroute.provider, prefix: '/init'}
 
     bootcamp.systemhealth:
         class: Netgusto\BootCampBundle\EventListener\SystemHealthCheckerListener
