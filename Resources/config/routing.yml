@@ -1,27 +1,3 @@
-_init_welcome:
-    pattern: _init/welcome
-    defaults: { _controller: initialization.controller:welcomeAction }
-
-_init_step1_createdb:
-    pattern: _init/step1/db
-    defaults: { _controller: initialization.controller:step1CreateDbAction }
-    methods: [GET, POST]
-
-_init_step1_createschema:
-    pattern: _init/step1/createschema
-    defaults: { _controller: initialization.controller:step1CreateSchemaAction }
-    methods: [GET, POST]
-
-_init_step1_updateschema:
-    pattern: _init/step1/updateschema
-    defaults: { _controller: initialization.controller:step1UpdateSchemaAction }
-    methods: [GET, POST]
-
-_init_step2:
-    pattern: _init/step2
-    defaults: { _controller: initialization.controller:step2Action }
-    methods: [GET, POST]
-
-_init_finish:
-    pattern: _init/finish
-    defaults: { _controller: initialization.controller:finishAction }
+autoroute:
+    resource: "@NetgustoAutorouteBundle/Resources/config/routing.yml"
+    prefix:   /

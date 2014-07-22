@@ -1,0 +1,27 @@
+_init_welcome:
+    pattern: welcome
+    defaults: { _controller: initialization.controller:welcomeAction }
+
+_init_step1_createdb:
+    pattern: step1/db
+    defaults: { _controller: initialization.controller:step1CreateDbAction }
+    methods: [GET, POST]
+
+_init_step1_createschema:
+    pattern: step1/createschema
+    defaults: { _controller: initialization.controller:step1CreateSchemaAction }
+    methods: [GET, POST]
+
+_init_step1_updateschema:
+    pattern: step1/updateschema
+    defaults: { _controller: initialization.controller:step1UpdateSchemaAction }
+    methods: [GET, POST]
+
+_init_step2:
+    pattern: step2
+    defaults: { _controller: initialization.controller:step2Action }
+    methods: [GET, POST]
+
+_init_finish:
+    pattern: finish
+    defaults: { _controller: initialization.controller:finishAction }
