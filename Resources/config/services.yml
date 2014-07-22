@@ -33,3 +33,18 @@ services:
             # LAZYLOADED # - @initialization.controller
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+
+    scalar.interpreter:
+        class: Netgusto\BootCampBundle\Services\ScalarInterpreterService
+
+    environment:
+        class: Netgusto\BootCampBundle\Services\Context\EnvironmentService
+        arguments:
+            - %environment_resolved%
+            - @scalar.interpreter
+            - %rootdir%
+
+    system.status:
+        class: Netgusto\BootCampBundle\Services\Context\SystemStatusService
+        arguments:
+            - @doctrine.orm.entity_manager
