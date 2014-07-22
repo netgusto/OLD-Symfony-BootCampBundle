@@ -1,3 +1,5 @@
 imports:
+    - { resource: %kernel.root_dir%/config/defaults/parameters.defaults.yml }
+    - { resource: %kernel.root_dir%/config/defaults/environment.defaults.yml }
     - { resource: "@NetgustoBootCampBundle/Resources/config/preprocessors/environment_resolver.php" }
     - { resource: "@NetgustoBootCampBundle/Resources/config/preprocessors/database_loader.php" }

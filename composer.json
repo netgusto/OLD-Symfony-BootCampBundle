@@ -14,7 +14,9 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "symfony/framework-bundle": "~2.4"
+        "symfony/framework-bundle": "~2.4",
+        "netgusto/autoroute-bundle": "1.0.0",
+        "netgusto/devserver-bundle": "dev-master"
     },
     "require-dev": {
     },

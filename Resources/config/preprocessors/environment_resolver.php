@@ -3,10 +3,13 @@
 use Habitat\Habitat;
 
 $_bootenv = function($container) {
+
+    $env_default_app = $container->hasParameter('environment.application.defaults') ? $container->getParameter('environment.application.defaults') : array();
+    $env_default_user = $container->hasParameter('environment.defaults') ? $container->getParameter('environment.defaults') : array();
     $merged_env = array_merge(
-        $container->getParameter('environment.application.defaults'),   # application defaults
-        $container->getParameter('environment.defaults'),               # user defaults
-        Habitat::getAll()                                               # the real environment
+        $env_default_app,       # application defaults
+        $env_default_user,      # user defaults
+        Habitat::getAll()       # the real environment
     );
 
     $authorized_keys = array(
