@@ -425,7 +425,10 @@ class InitializationController {
     protected function createSiteConfig(EntityManager $em, BootCampServices\Context\EnvironmentService $environment) {
 
         #$configfile = $rootdir . '/data/config/config.yml';
-        $configfile = $environment->getSrcdir() . '/Netgusto/BootCampBundle/Resources/config/config.yml.dist';
+        $configfile = $this->bootcampParameters['initconfig']['file'];
+        if(!file_exists($configfile)) {
+            throw new \Exception('Initialization config file does not exist (looked in ' . $configfile . ').', 500);
+        }
 
         $siteconfig = new HierarchicalConfig();
         $siteconfig->setName('config.site');

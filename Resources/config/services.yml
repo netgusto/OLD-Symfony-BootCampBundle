@@ -3,9 +3,9 @@ services:
     bootcamp.init.autoroute:
         class: Netgusto\AutorouteBundle\Routing\AutorouteProvider
         arguments:
-            - "\@NetgustoBootCampBundle/Resources/config/routes/init.yml"
+            - @='@NetgustoBootCampBundle/Resources/config/routes/init.yml'
         tags:
-            - { name: autoroute.provider, prefix: '/init'}
+            - { name: autoroute.provider, prefix: '/_init'}
 
     bootcamp.systemhealth:
         class: Netgusto\BootCampBundle\EventListener\SystemHealthCheckerListener
@@ -45,6 +45,25 @@ services:
         class: Netgusto\BootCampBundle\Services\Context\SystemStatusService
         arguments:
             - @doctrine.orm.entity_manager
+
+    twig.pulpyextension:
+        class: Netgusto\BootCampBundle\Twig\BootCampExtension
+        arguments:
+            # Inject service container to lazyload dependencies
+            - @service_container
+        tags:
+            - { name: twig.extension }
+
+    config.loader.dbbacked:
+        class: Netgusto\BootCampBundle\Services\Config\Loader\DbBackedConfigLoaderService
+        arguments:
+            - @doctrine.orm.entity_manager
+            - { data.dir: '' }
+
+    config.site:
+        class: %bootcamp.initconfig.class%
+        arguments:
+            - @=service('config.loader.dbbacked').load('config.site')
 
     initialization.controller:
         class: Netgusto\BootCampBundle\Controller\InitializationController
