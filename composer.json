@@ -17,7 +17,7 @@
         "symfony/framework-bundle": "~2.4",
         "netgusto/autoroute-bundle": "1.0.1",
         "netgusto/devserver-bundle": "1.1.0",
-        "netgusto/webvendor-bundle": "dev-master",
+        "netgusto/webvendor-bundle": "1.0.0",
         "brianium/habitat": "v1.0.0"
     },
     "require-dev": {
