@@ -1,5 +1,0 @@
-# Parameters here will override every app/config and data/config, as they are loaded later in the compilation process
-parameters:
-    appversion: 1.0.0
-    rootdir: %kernel.root_dir%/..
-    srcdir: %rootdir%/src
