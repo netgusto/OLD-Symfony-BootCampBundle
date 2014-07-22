@@ -1,0 +1,20 @@
+Netgusto\BootCampBundle\Entity\SystemStatus:
+    type: entity
+    table: ~
+    fields:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+
+        configuredversion:
+            type: string
+            length: 32
+            nullable: false
+
+        initialized:
+            type: boolean
+            nullable: false
+
+    lifecycleCallbacks: {  }
