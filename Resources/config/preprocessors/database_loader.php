@@ -1,6 +1,6 @@
 <?php
 
-use Pulpy\CoreBundle\Services\DatabaseUrlResolverService;
+use Netgusto\BootCampBundle\Services\DatabaseUrlResolverService;
 
 $_bootdb = function($container) {
 
