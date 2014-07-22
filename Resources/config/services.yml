@@ -1,5 +1,5 @@
 parameters:
-#    netgusto_boot_camp.example.class: Netgusto\BootCampBundle\Example
+    appversion: 1.0.0
 
 services:
 
@@ -48,3 +48,18 @@ services:
         class: Netgusto\BootCampBundle\Services\Context\SystemStatusService
         arguments:
             - @doctrine.orm.entity_manager
+
+    initialization.controller:
+        class: Netgusto\BootCampBundle\Controller\InitializationController
+        lazy: true
+        arguments:
+            # To disable the profiler bar if defined
+            - @service_container
+            - @twig
+            - @environment
+            - @router
+            - @form.factory
+            - @doctrine.orm.entity_manager
+            - %appversion%
+            - @security.encoder_factory
+            - @system.status
