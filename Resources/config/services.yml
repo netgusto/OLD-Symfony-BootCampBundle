@@ -42,7 +42,7 @@ services:
         arguments:
             - %environment_resolved%
             - @scalar.interpreter
-            - %rootdir%
+            - %kernel.root_dir%
 
     system.status:
         class: Netgusto\BootCampBundle\Services\Context\SystemStatusService
