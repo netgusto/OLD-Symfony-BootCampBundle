@@ -231,7 +231,7 @@ class InitializationController {
             }
         }
 
-        return new Response($this->twig->render('@BootCamp/Initialization/welcome.html.twig', array(
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:welcome.html.twig', array(
             'nextroute' => $nextroute,
         )));
     }
@@ -255,7 +255,7 @@ class InitializationController {
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
         }
 
-        return new Response($this->twig->render('@BootCamp/Initialization/init_step1_createdb.html.twig', array(
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_createdb.html.twig', array(
             'form' => $form->createView(),
         )));
     }
@@ -278,7 +278,7 @@ class InitializationController {
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
         }
 
-        return new Response($this->twig->render('@BootCamp/Initialization/init_step1_createschema.html.twig', array(
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_createschema.html.twig', array(
             'form' => $form->createView(),
         )));
     }
@@ -317,7 +317,7 @@ class InitializationController {
             return new RedirectResponse($this->urlgenerator->generate('_init_finish'));
         }
 
-        return new Response($this->twig->render('@BootCamp/Initialization/init_step2.html.twig', array(
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step2.html.twig', array(
             'form' => $form->createView(),
         )));
     }
@@ -327,7 +327,7 @@ class InitializationController {
             return $response;
         }
 
-        return new Response($this->twig->render('@BootCamp/Initialization/init_finish.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_finish.html.twig'));
     }
 
     /* Utilitary functions */

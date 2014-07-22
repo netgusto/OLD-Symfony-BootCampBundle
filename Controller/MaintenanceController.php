@@ -33,26 +33,26 @@ class MaintenanceController {
     }
 
     public function databaseInvalidCredentialsAction(Request $request, BootCampException\MaintenanceNeeded\DatabaseInvalidCredentialsMaintenanceNeededException $e) {
-        return new Response($this->twig->render('@BootCamp/Maintenance/databaseinvalidcredentials.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Maintenance:databaseinvalidcredentials.html.twig'));
     }
 
     public function databaseUpdateAction(Request $request, BootCampException\MaintenanceNeeded\DatabaseUpdateMaintenanceNeededException $e) {
-        return new Response($this->twig->render('@BootCamp/Maintenance/databaseupdate.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Maintenance:databaseupdate.html.twig'));
     }
 
     public function administrativeAccountMissingAction(Request $request, BootCampException\MaintenanceNeeded\AdministrativeAccountMissingMaintenanceNeededException $e) {
-        return new Response($this->twig->render('@BootCamp/Maintenance/administrativeaccountmissing.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Maintenance:administrativeaccountmissing.html.twig'));
     }
 
     public function systemStatusMissingAction(Request $request, BootCampException\MaintenanceNeeded\SystemStatusMissingMaintenanceNeededException $e) {
-        return new Response($this->twig->render('@BootCamp/Maintenance/systemstatusmissing.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Maintenance:systemstatusmissing.html.twig'));
     }
 
     public function siteConfigFileMissingAction(Request $request, BootCampException\MaintenanceNeeded\SiteConfigFileMissingMaintenanceNeededException $e) {
-        return new Response($this->twig->render('@BootCamp/Maintenance/siteconfigfilemissing.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Maintenance:siteconfigfilemissing.html.twig'));
     }
 
     public function unknownMaintenanceTaskAction(Request $request, BootCampException\MaintenanceNeeded\MaintenanceNeededExceptionInterface $e) {
-        return new Response($this->twig->render('@BootCamp/Maintenance/unknownmaintenancetask.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Maintenance:unknownmaintenancetask.html.twig'));
     }
 }
