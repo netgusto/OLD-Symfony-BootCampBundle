@@ -1,3 +1,5 @@
 imports:
+    # Relative to bundle dir in /vendor; found no other way, as %kernel.root_dir% is not usable here
+    - { resource: "../../../../../../../data/environment.defaults.yml" }
     - { resource: "@NetgustoBootCampBundle/Resources/config/preprocessors/environment_resolver.php" }
     - { resource: "@NetgustoBootCampBundle/Resources/config/preprocessors/database_loader.php" }

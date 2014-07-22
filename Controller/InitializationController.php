@@ -17,7 +17,6 @@ use Doctrine\ORM\EntityManager,
 
 use Netgusto\BootCampBundle\Exception as BootCampException,
     Netgusto\BootCampBundle\Services as BootCampServices,
-    Netgusto\BootCampBundle\Entity\AppUser,
     Netgusto\BootCampBundle\Form\Type as FormType,
     Netgusto\BootCampBundle\Entity\SystemStatus,
     Netgusto\BootCampBundle\Entity\HierarchicalConfig;
@@ -29,10 +28,9 @@ class InitializationController {
     protected $environment;
     protected $urlgenerator;
     protected $formfactory;
-    protected $em;
-    protected $appversion;
     protected $passwordencoder_factory;
     protected $systemstatus;
+    protected $bootcampParameters;
 
     const DIAG_DBNOCONNECTION = 'DIAG_DBNOCONNECTION';
     const DIAG_DBMISSING = 'DIAG_DBMISSING';
@@ -50,20 +48,18 @@ class InitializationController {
         BootCampServices\Context\EnvironmentService $environment,
         Router $urlgenerator,
         FormFactory $formfactory,
-        EntityManager $em,
-        $appversion,
         EncoderFactory $passwordencoder_factory,
-        BootCampServices\Context\SystemStatusService $systemstatus
+        BootCampServices\Context\SystemStatusService $systemstatus,
+        array $bootcampParameters
     ) {
+        $this->container = $container;
         $this->twig = $twig;
         $this->environment = $environment;
         $this->urlgenerator = $urlgenerator;
         $this->formfactory = $formfactory;
-        $this->em = $em;
-        $this->appversion = $appversion;
         $this->passwordencoder_factory = $passwordencoder_factory;
         $this->systemstatus = $systemstatus;
-
+        $this->bootcampParameters = $bootcampParameters;
         $this->appdiag = $this->appDiagnostic();
 
         # Disable the profiler
@@ -93,6 +89,7 @@ class InitializationController {
         switch(TRUE) {
 
             case $e instanceOf BootCampException\InitializationNeeded\InstallModeActivatedInitializationNeededException:
+            case $e instanceOf BootCampException\InitializationNeeded\DatabaseCredentialsNotSetInitializationNeededException:
             case $e instanceOf BootCampException\InitializationNeeded\DatabaseMissingInitializationNeededException:
             case $e instanceOf BootCampException\InitializationNeeded\DatabaseEmptyInitializationNeededException: {
                 $nextroute = '_init_welcome';
@@ -121,6 +118,10 @@ class InitializationController {
 
         if($request->attributes->get('_route') === '_init_welcome') {
             return $this->welcomeAction($request);
+        }
+
+        if($request->attributes->get('_route') === '_init_step1_dbnoconnection') {
+            return $this->step1DBNoConnectionAction($request);
         }
 
         if($request->attributes->get('_route') === '_init_step1_createdb') {
@@ -157,7 +158,12 @@ class InitializationController {
 
     protected function appDiagnostic() {
 
-        $connection = $this->em->getConnection();
+        try {
+            $em = $this->container->get('doctrine.orm.entity_manager');
+            $connection = $em->getConnection();
+        } catch(\Exception $e) {
+            return self::DIAG_DBNOCONNECTION;
+        }
 
         # We check if the database exists
         try {
@@ -184,7 +190,7 @@ class InitializationController {
             return self::DIAG_SYSTEMSTATUSMISSING;
         }
 
-        $versiondiff = version_compare($this->systemstatus->getConfiguredversion(), $this->appversion);
+        $versiondiff = version_compare($this->systemstatus->getConfiguredversion(), $this->bootcampParameters['appversion']);
         if($versiondiff > 0) {
             return self::DIAG_CONFIGUREDVERSIONTOOHIGH;
         } elseif ($versiondiff < 0) {
@@ -204,8 +210,16 @@ class InitializationController {
             return new RedirectResponse($this->urlgenerator->generate('_init_finish'));
         }
 
-        switch($this->appdiag) {
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:welcome.html.twig', array(
+            'nextroute' => $this->nextRouteForDiag($this->appdiag),
+            'bootcamp' => $this->bootcampParameters
+        )));
+    }
 
+    protected function nextRouteForDiag($diag) {
+        $nextroute = '_init_welcome';
+
+        switch($diag) {
             case self::DIAG_DBNOCONNECTION: {
                 $nextroute = '_init_step1_dbnoconnection';
                 break;
@@ -231,8 +245,28 @@ class InitializationController {
             }
         }
 
-        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:welcome.html.twig', array(
-            'nextroute' => $nextroute,
+        return $nextroute;
+    }
+
+    public function step1DBNoConnectionAction(Request $request) {
+
+        $form = $this->formfactory->create(new FormType\WelcomeStep1Type());
+        $form->handleRequest($request);
+
+        if($form->isValid()) {
+            $diag = $this->appDiagnostic();
+            if($diag !== self::DIAG_DBNOCONNECTION) {
+                return new RedirectResponse(
+                    $this->urlgenerator->generate(
+                        $this->nextRouteForDiag($this->appdiag)
+                    )
+                );
+            }
+        }
+
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_dbnoconnection.html.twig', array(
+            'form' => $form->createView(),
+            'bootcamp' => $this->bootcampParameters
         )));
     }
 
@@ -242,21 +276,24 @@ class InitializationController {
             return $response;
         }
 
+        $em = $this->container->get('doctrine.orm.entity_manager');
+
         $form = $this->formfactory->create(new FormType\WelcomeStep1Type());
         $form->handleRequest($request);
 
         if($form->isValid()) {
             # The database is created and initialized
-            $this->createDatabase($this->em->getConnection());
-            $this->createSchema($this->em);
-            $this->createSystemStatus($this->em, $this->appversion);
-            $this->createSiteConfig($this->em, $this->environment);
+            $this->createDatabase($em->getConnection());
+            $this->createSchema($em);
+            $this->createSystemStatus($em, $this->bootcampParameters['appversion']);
+            $this->createSiteConfig($em, $this->environment);
 
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
         }
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_createdb.html.twig', array(
             'form' => $form->createView(),
+            'bootcamp' => $this->bootcampParameters
         )));
     }
 
@@ -266,20 +303,23 @@ class InitializationController {
             return $response;
         }
 
+        $em = $this->container->get('doctrine.orm.entity_manager');
+
         $form = $this->formfactory->create(new FormType\WelcomeStep1Type());
         $form->handleRequest($request);
 
         if($form->isValid()) {
             # The schemas are created
-            $this->createSchema($this->em);
-            $this->createSystemStatus($this->em, $this->appversion);
-            $this->createSiteConfig($this->em, $this->environment);
+            $this->createSchema($em);
+            $this->createSystemStatus($em, $this->bootcampParameters['appversion']);
+            $this->createSiteConfig($em, $this->environment);
 
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
         }
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_createschema.html.twig', array(
             'form' => $form->createView(),
+            'bootcamp' => $this->bootcampParameters
         )));
     }
 
@@ -293,23 +333,38 @@ class InitializationController {
         $form->handleRequest($request);
         if($form->isValid()) {
 
-            $data = $form->getData();
-            $user = new AppUser();
+            $userclass = $this->bootcampParameters['user']['class'];
+            
+            $usernameProp = $this->bootcampParameters['user']['propertymapping']['username'];
+            $rolesProp = $this->bootcampParameters['user']['propertymapping']['roles'];
+            $passwordProp = $this->bootcampParameters['user']['propertymapping']['password'];
+            $saltProp = $this->bootcampParameters['user']['propertymapping']['salt'];
 
-            $user->setEmail($data['email']);
-            $user->setSalt(md5(rand() . microtime()));
-            $user->setRoles(array('ROLE_ADMIN'));
-            $user->setPassword(
+            $usernameSetter = 'set' . ucfirst($usernameProp);
+            $rolesSetter = 'set' . ucfirst($rolesProp);
+            $passwordSetter = 'set' . ucfirst($passwordProp);
+            $saltSetter = 'set' . ucfirst($saltProp);
+
+            $data = $form->getData();
+            $user = new $userclass();
+            $salt = md5(rand() . microtime());
+
+            $user->$usernameSetter($data['email']);
+            $user->$saltSetter($salt);
+            $user->$rolesSetter($this->bootcampParameters['user']['initroles']);
+            $user->$passwordSetter(
                 $this->passwordencoder_factory
                     ->getEncoder($user)
                     ->encodePassword(
                         $data['password'],
-                        $user->getSalt()
+                        $salt
                     )
             );
 
-            $this->em->persist($user);
-            $this->em->flush();
+            $em = $this->container->get('doctrine.orm.entity_manager');
+
+            $em->persist($user);
+            $em->flush();
 
             # We mark the application as initialized
             $this->systemstatus->setInitialized(TRUE);
@@ -319,6 +374,7 @@ class InitializationController {
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step2.html.twig', array(
             'form' => $form->createView(),
+            'bootcamp' => $this->bootcampParameters
         )));
     }
 
@@ -327,7 +383,9 @@ class InitializationController {
             return $response;
         }
 
-        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_finish.html.twig'));
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_finish.html.twig', array(
+            'bootcamp' => $this->bootcampParameters
+        )));
     }
 
     /* Utilitary functions */
@@ -336,7 +394,7 @@ class InitializationController {
         if($this->environment->getInitializationMode() !== TRUE) {
             
             if($this->appdiag === self::DIAG_OK) {
-                return new RedirectResponse($this->urlgenerator->generate('home'));
+                return new RedirectResponse('/');
             }
 
             return new Response('Initialization mode off. Access denied.', 401);
@@ -357,7 +415,7 @@ class InitializationController {
 
     protected function createSystemStatus(EntityManager $em, $appversion) {
         $systemStatus = new SystemStatus();
-        $systemStatus->setConfiguredversion($appversion);
+        $systemStatus->setConfiguredversion($this->bootcampParameters['appversion']);
         $systemStatus->setInitialized(FALSE);
 
         $em->persist($systemStatus);

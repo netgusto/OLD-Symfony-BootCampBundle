@@ -24,12 +24,10 @@ class InitializationExceptionListener {
 
     public function __construct(
         ContainerInterface $container,
-        Connection $connection,
         EnvironmentService $environment,
         Request $request
     ) {
         $this->container = $container;
-        $this->connection = $connection;
         $this->environment = $environment;
         $this->request = $request;
     }
@@ -41,13 +39,19 @@ class InitializationExceptionListener {
         # It's not an InitializationNeeded exception
         # We check if it's an exception that indicates that the application needs initialization
 
+        try {
+            $connection = $this->container->get('database_connection');
+        } catch(\Exception $ex) {
+            $exception = new CoreException\InitializationNeeded\DatabaseCredentialsNotSetInitializationNeededException();
+        }
+
         if(
             $exception instanceof \Doctrine\DBAL\DBALException ||
             $exception instanceof \PDOException
         ) {
             $exception = $this->resolveDBException(
                 $exception,
-                $this->connection
+                $this->container->get('database_connection')
             );
         }
 

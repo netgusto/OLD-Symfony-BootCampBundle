@@ -8,7 +8,9 @@
     {% endblock header %}
 
     {% block content %}
-        <h1 class="content-subhead">Creating the database</h1>
+        <h1 class="content-subhead">Cannot connect to the database</h1>
+
+        <p>It seems that {{bootcamp.appname}} cannot connect to the database. Please, point the <strong>DATABASE_URL</strong> to a valid database URI, then click the button.</p>
 
         {{ form_start(form, { 'attr': { 'autocomplete': 'off' }}) }}
             <p class="text-center"><button type="submit" class="btn btn-primary btn-large">Continue <i class="fa fa-arrow-circle-right"></i></button></p>
