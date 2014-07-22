@@ -6,7 +6,7 @@ services:
     bootcamp.autoroute:
         class: Netgusto\AutorouteBundle\Routing\AutorouteProvider
         arguments:
-            - "@BootCampBundle/Resources/config/routes/init.yml"
+            - "@""BootCampBundle/Resources/config/routes/init.yml"
         tags:
             - { name: autoroute.provider }
 
