@@ -1,5 +1,3 @@
 imports:
-    - { resource: app/config/defaults/parameters.application.defaults.yml }
-    - { resource: app/config/defaults/environment.application.defaults.yml }
     - { resource: "@NetgustoBootCampBundle/Resources/config/preprocessors/environment_resolver.php" }
     - { resource: "@NetgustoBootCampBundle/Resources/config/preprocessors/database_loader.php" }
