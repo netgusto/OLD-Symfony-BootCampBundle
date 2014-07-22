@@ -2,6 +2,34 @@ parameters:
 #    netgusto_boot_camp.example.class: Netgusto\BootCampBundle\Example
 
 services:
-#    netgusto_boot_camp.example:
-#        class: %netgusto_boot_camp.example.class%
-#        arguments: [@service_id, "plain_value", %parameter%]
+
+    bootcamp.autoroute:
+        class: Netgusto\AutorouteBundle\Routing\AutorouteProvider
+        arguments:
+            - "%kernel.root_dir%/src/Netgusto/CoreBundle/Resources/config/routing.yml"
+        tags:
+            - { name: autoroute.provider }
+
+    bootcamp.systemhealth:
+        class: Netgusto\BootCampBundle\EventListener\SystemHealthCheckerListener
+        arguments:
+            # Event listener are not lazyloaded, so need to inject service container to still lazyload @system.status
+            - @service_container
+            - @environment
+            - @database_connection
+            # LAZYLOADED # - @system.status
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+
+    bootcamp.exceptionlistener:
+        class: Netgusto\BootCampBundle\EventListener\InitializationExceptionListener
+        scope: request
+        arguments:
+            # Event listener are not lazyloaded, so need to inject service container to still lazyload @initialization.controller
+            - @service_container
+            - @database_connection
+            - @environment
+            - @request
+            # LAZYLOADED # - @initialization.controller
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
