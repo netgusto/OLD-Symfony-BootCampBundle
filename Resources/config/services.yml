@@ -1,0 +1,7 @@
+parameters:
+#    netgusto_boot_camp.example.class: Netgusto\BootCampBundle\Example
+
+services:
+#    netgusto_boot_camp.example:
+#        class: %netgusto_boot_camp.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]
