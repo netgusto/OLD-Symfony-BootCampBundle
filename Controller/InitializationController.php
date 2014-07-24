@@ -31,6 +31,7 @@ class InitializationController {
     protected $passwordencoder_factory;
     protected $systemstatus;
 
+    const DIAG_DBNOURL = 'DIAG_DBNOURL';
     const DIAG_DBNOCONNECTION = 'DIAG_DBNOCONNECTION';
     const DIAG_DBMISSING = 'DIAG_DBMISSING';
     const DIAG_DBEMPTY = 'DIAG_DBEMPTY';
@@ -123,6 +124,10 @@ class InitializationController {
             return $this->welcomeAction($request);
         }
 
+        if($request->attributes->get('_route') === '_init_step1_dbnourl') {
+            return $this->step1DBNoURLAction($request);
+        }
+
         if($request->attributes->get('_route') === '_init_step1_dbnoconnection') {
             return $this->step1DBNoConnectionAction($request);
         }
@@ -160,6 +165,11 @@ class InitializationController {
     }
 
     protected function appDiagnostic() {
+
+        # Environment variable DATABASE_URL is not set
+        if(is_null($this->environment->getEnv('DATABASE_URL'))) {
+            return self::DIAG_DBNOURL;
+        }
 
         try {
             $em = $this->container->get('doctrine.orm.entity_manager');
@@ -223,6 +233,10 @@ class InitializationController {
         $nextroute = '_init_welcome';
 
         switch($diag) {
+            case self::DIAG_DBNOURL: {
+                $nextroute = '_init_step1_dbnourl';
+                break;
+            }
             case self::DIAG_DBNOCONNECTION: {
                 $nextroute = '_init_step1_dbnoconnection';
                 break;
@@ -251,6 +265,28 @@ class InitializationController {
         return $nextroute;
     }
 
+    public function step1DBNoURLAction(Request $request) {
+
+        $form = $this->formfactory->create(new FormType\WelcomeStep1Type());
+        $form->handleRequest($request);
+
+        if($form->isValid()) {
+            $diag = $this->appDiagnostic();
+            if($diag !== self::DIAG_DBNOURL) {
+                return new RedirectResponse(
+                    $this->urlgenerator->generate(
+                        $this->nextRouteForDiag($diag)
+                    )
+                );
+            }
+        }
+
+        return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_dbnourl.html.twig', array(
+            'form' => $form->createView(),
+            'bootcamp' => $this->templateParameters
+        )));
+    }
+
     public function step1DBNoConnectionAction(Request $request) {
 
         $form = $this->formfactory->create(new FormType\WelcomeStep1Type());
@@ -261,7 +297,7 @@ class InitializationController {
             if($diag !== self::DIAG_DBNOCONNECTION) {
                 return new RedirectResponse(
                     $this->urlgenerator->generate(
-                        $this->nextRouteForDiag($this->appdiag)
+                        $this->nextRouteForDiag($diag)
                     )
                 );
             }

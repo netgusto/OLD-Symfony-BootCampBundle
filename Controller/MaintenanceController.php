@@ -1,6 +1,6 @@
 <?php
 
-namespace Pulpy\CoreBundle\Controller;
+namespace Netgusto\BootCampBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
@@ -27,7 +27,7 @@ class MaintenanceController {
 
     public function proceedWithRequestAction(Request $request, BootCampException\MaintenanceNeeded\MaintenanceNeededExceptionInterface $e) {
         /*
-            Maintenance routes are not yet defined in Pulpy;
+            Maintenance routes are not yet defined;
             TODO: Implement maintenance routes and map them here
         */
     }

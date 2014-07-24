@@ -4,8 +4,8 @@ namespace Netgusto\BootCampBundle\Services\Context;
 
 use Doctrine\ORM\EntityManager;
 
-use Pulpy\CoreBundle\Entity\SystemStatus,
-    Pulpy\CoreBundle\Exception\MaintenanceNeeded\SystemStatusMissingMaintenanceNeededException;
+use Netgusto\BootCampBundle\Entity\SystemStatus,
+    Netgusto\BootCampBundle\Exception\MaintenanceNeeded\SystemStatusMissingMaintenanceNeededException;
 
 class SystemStatusService {
 
@@ -32,20 +32,6 @@ class SystemStatusService {
         }
 
         throw new SystemStatusMissingMaintenanceNeededException();
-    }
-
-    public function getPostCacheLastUpdate() {
-        $this->fetch();
-        return $this->systemstatus->getPostcachelastupdate();
-    }
-
-    public function setPostCacheLastUpdate(\DateTime $postlastcacheupdate) {
-        $this->fetch();
-        $this->systemstatus->setPostcachelastupdate($postlastcacheupdate);
-        $this->em->persist($this->systemstatus);
-        $this->em->flush();
-
-        return $this;
     }
 
     public function getInitialized() {

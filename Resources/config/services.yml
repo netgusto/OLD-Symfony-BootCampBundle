@@ -46,7 +46,7 @@ services:
         arguments:
             - @doctrine.orm.entity_manager
 
-    twig.pulpyextension:
+    twig.bootcampextension:
         class: Netgusto\BootCampBundle\Twig\BootCampExtension
         arguments:
             # Inject service container to lazyload dependencies

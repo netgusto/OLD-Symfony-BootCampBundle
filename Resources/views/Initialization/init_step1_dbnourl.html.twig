@@ -1,0 +1,23 @@
+{% extends 'NetgustoBootCampBundle:Initialization:base.html.twig' %}
+
+{% block body %}
+{% embed 'NetgustoBootCampBundle:Initialization:embeddable/layout.header+content.html.twig' %}
+
+    {% block header %}
+        <h1>{{ bootcamp.appname }}: Initialization</h1>
+    {% endblock header %}
+
+    {% block content %}
+        <h1 class="content-subhead">Database connection not configured</h1>
+
+        <p>No connection to the database is configured.</p>
+        <p>Please, point the <strong>DATABASE_URL</strong> environment variable to a valid database URL (by defining it in the application environment, or by adding it to the /data/environment.yml file), then click the button.</p>
+
+        {{ form_start(form, { 'attr': { 'autocomplete': 'off' }}) }}
+            <p class="text-center"><button type="submit" class="btn btn-primary btn-large">Continue <i class="fa fa-arrow-circle-right"></i></button></p>
+        {{ form_end(form) }}
+
+    {% endblock content %}
+
+{% endembed %}
+{% endblock %}

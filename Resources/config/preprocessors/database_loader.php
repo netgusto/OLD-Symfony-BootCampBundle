@@ -20,7 +20,7 @@ $_bootdb = function($container) {
         $container->setParameter('database_password', null);
         $container->setParameter('database_host', null);
         $container->setParameter('database_port', null);
-        $container->setParameter('database_name', 'somedb');
+        $container->setParameter('database_name', rand());
     }
 };
 

@@ -2,6 +2,10 @@ _init_welcome:
     pattern: welcome
     defaults: { _controller: initialization.controller:welcomeAction }
 
+_init_step1_dbnourl:
+    pattern: step1/dbnourl
+    defaults: { _controller: initialization.controller:step1DBNoURLAction }
+
 _init_step1_dbnoconnection:
     pattern: step1/dbnoconnection
     defaults: { _controller: initialization.controller:step1DBNoConnectionAction }
