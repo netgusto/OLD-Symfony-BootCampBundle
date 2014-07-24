@@ -30,7 +30,6 @@ class InitializationController {
     protected $formfactory;
     protected $passwordencoder_factory;
     protected $systemstatus;
-    protected $bootcampParameters;
 
     const DIAG_DBNOCONNECTION = 'DIAG_DBNOCONNECTION';
     const DIAG_DBMISSING = 'DIAG_DBMISSING';
@@ -49,8 +48,7 @@ class InitializationController {
         Router $urlgenerator,
         FormFactory $formfactory,
         EncoderFactory $passwordencoder_factory,
-        BootCampServices\Context\SystemStatusService $systemstatus,
-        array $bootcampParameters
+        BootCampServices\Context\SystemStatusService $systemstatus
     ) {
         $this->container = $container;
         $this->twig = $twig;
@@ -59,13 +57,18 @@ class InitializationController {
         $this->formfactory = $formfactory;
         $this->passwordencoder_factory = $passwordencoder_factory;
         $this->systemstatus = $systemstatus;
-        $this->bootcampParameters = $bootcampParameters;
         $this->appdiag = $this->appDiagnostic();
 
         # Disable the profiler
         if($container->has('profiler')) {
             $container->get('profiler')->disable();
         }
+
+        $this->templateParameters = array(
+            'appversion' => $this->container->getParameter('bootcamp.appversion'),
+            'appname' => $this->container->getParameter('bootcamp.appname'),
+            'welcome' => array('intro' => $this->container->getParameter('bootcamp.welcome')),
+        );
     }
 
     public function reactToExceptionAction(
@@ -190,7 +193,7 @@ class InitializationController {
             return self::DIAG_SYSTEMSTATUSMISSING;
         }
 
-        $versiondiff = version_compare($this->systemstatus->getConfiguredversion(), $this->bootcampParameters['appversion']);
+        $versiondiff = version_compare($this->systemstatus->getConfiguredversion(), $this->container->getParameter('bootcamp.appversion'));
         if($versiondiff > 0) {
             return self::DIAG_CONFIGUREDVERSIONTOOHIGH;
         } elseif ($versiondiff < 0) {
@@ -212,7 +215,7 @@ class InitializationController {
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:welcome.html.twig', array(
             'nextroute' => $this->nextRouteForDiag($this->appdiag),
-            'bootcamp' => $this->bootcampParameters
+            'bootcamp' => $this->templateParameters,
         )));
     }
 
@@ -266,7 +269,7 @@ class InitializationController {
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_dbnoconnection.html.twig', array(
             'form' => $form->createView(),
-            'bootcamp' => $this->bootcampParameters
+            'bootcamp' => $this->templateParameters
         )));
     }
 
@@ -285,7 +288,7 @@ class InitializationController {
             # The database is created and initialized
             $this->createDatabase($em->getConnection());
             $this->createSchema($em);
-            $this->createSystemStatus($em, $this->bootcampParameters['appversion']);
+            $this->createSystemStatus($em, $this->container->getParameter('bootcamp.appversion'));
             $this->createSiteConfig($em, $this->environment);
 
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
@@ -293,7 +296,7 @@ class InitializationController {
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_createdb.html.twig', array(
             'form' => $form->createView(),
-            'bootcamp' => $this->bootcampParameters
+            'bootcamp' => $this->templateParameters
         )));
     }
 
@@ -311,7 +314,7 @@ class InitializationController {
         if($form->isValid()) {
             # The schemas are created
             $this->createSchema($em);
-            $this->createSystemStatus($em, $this->bootcampParameters['appversion']);
+            $this->createSystemStatus($em, $this->container->getParameter('bootcamp.appversion'));
             $this->createSiteConfig($em, $this->environment);
 
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
@@ -319,7 +322,7 @@ class InitializationController {
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step1_createschema.html.twig', array(
             'form' => $form->createView(),
-            'bootcamp' => $this->bootcampParameters
+            'bootcamp' => $this->templateParameters
         )));
     }
 
@@ -329,16 +332,20 @@ class InitializationController {
             return $response;
         }
 
+        if($this->container->getParameter('bootcamp.userinit.enabled') === FALSE) {
+            return new RedirectResponse($this->urlgenerator->generate('_init_finish'));
+        }
+
         $form = $this->formfactory->create(new FormType\WelcomeStep2Type());
         $form->handleRequest($request);
         if($form->isValid()) {
 
-            $userclass = $this->bootcampParameters['user']['class'];
+            $userclass = $this->container->getParameter('bootcamp.userinit.class');
             
-            $usernameProp = $this->bootcampParameters['user']['propertymapping']['username'];
-            $rolesProp = $this->bootcampParameters['user']['propertymapping']['roles'];
-            $passwordProp = $this->bootcampParameters['user']['propertymapping']['password'];
-            $saltProp = $this->bootcampParameters['user']['propertymapping']['salt'];
+            $usernameProp = $this->container->getParameter('bootcamp.userinit.mapping.username');
+            $rolesProp = $this->container->getParameter('bootcamp.userinit.mapping.roles');
+            $passwordProp = $this->container->getParameter('bootcamp.userinit.mapping.password');
+            $saltProp = $this->container->getParameter('bootcamp.userinit.mapping.salt');
 
             $usernameSetter = 'set' . ucfirst($usernameProp);
             $rolesSetter = 'set' . ucfirst($rolesProp);
@@ -351,7 +358,7 @@ class InitializationController {
 
             $user->$usernameSetter($data['email']);
             $user->$saltSetter($salt);
-            $user->$rolesSetter($this->bootcampParameters['user']['initroles']);
+            $user->$rolesSetter($this->container->getParameter('bootcamp.userinit.roles'));
             $user->$passwordSetter(
                 $this->passwordencoder_factory
                     ->getEncoder($user)
@@ -374,7 +381,7 @@ class InitializationController {
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_step2.html.twig', array(
             'form' => $form->createView(),
-            'bootcamp' => $this->bootcampParameters
+            'bootcamp' => $this->templateParameters
         )));
     }
 
@@ -384,7 +391,7 @@ class InitializationController {
         }
 
         return new Response($this->twig->render('NetgustoBootCampBundle:Initialization:init_finish.html.twig', array(
-            'bootcamp' => $this->bootcampParameters
+            'bootcamp' => $this->templateParameters
         )));
     }
 
@@ -415,7 +422,7 @@ class InitializationController {
 
     protected function createSystemStatus(EntityManager $em, $appversion) {
         $systemStatus = new SystemStatus();
-        $systemStatus->setConfiguredversion($this->bootcampParameters['appversion']);
+        $systemStatus->setConfiguredversion($this->container->getParameter('bootcamp.appversion'));
         $systemStatus->setInitialized(FALSE);
 
         $em->persist($systemStatus);
@@ -425,7 +432,7 @@ class InitializationController {
     protected function createSiteConfig(EntityManager $em, BootCampServices\Context\EnvironmentService $environment) {
 
         #$configfile = $rootdir . '/data/config/config.yml';
-        $configfile = $this->bootcampParameters['initconfig']['file'];
+        $configfile = $this->container->getParameter('bootcamp.initconfig.file');
         if(!file_exists($configfile)) {
             throw new \Exception('Initialization config file does not exist (looked in ' . $configfile . ').', 500);
         }

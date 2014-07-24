@@ -77,6 +77,5 @@ services:
             - @form.factory
             - @security.encoder_factory
             - @system.status
-            - %bootcamp%
 
             # LAZYLOADED # - @doctrine.orm.entity_manager

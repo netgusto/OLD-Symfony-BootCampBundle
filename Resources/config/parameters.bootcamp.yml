@@ -1,0 +1,14 @@
+parameters:
+    
+    bootcamp.appname: "HelloBootcamp"
+    bootcamp.appversion: "1.0.0"
+    bootcamp.welcome: "<p>We need to initialize some things, hold tight.</p>"
+    bootcamp.initconfig.file: "%kernel.root_dir%/../vendor/netgusto/bootcamp-bundle/Ressources/config/initconfig.empty.yml"
+    
+    bootcamp.userinit.enabled: false
+    #bootcamp.userinit.class: "Netgusto\HelloBundle\Entity\AppUser"
+    bootcamp.userinit.roles: ["ROLE_ADMIN"]
+    bootcamp.userinit.mapping.username: "username"
+    bootcamp.userinit.mapping.roles: "roles"
+    bootcamp.userinit.mapping.password: "password"
+    bootcamp.userinit.mapping.salt: "salt"

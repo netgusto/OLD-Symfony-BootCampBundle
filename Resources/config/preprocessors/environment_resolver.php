@@ -5,7 +5,7 @@ use Habitat\Habitat;
 $_bootenv = function($container) {
 
     $env_default_app = $container->hasParameter('environment.application.defaults') ? $container->getParameter('environment.application.defaults') : array();
-    $env_default_user = $container->hasParameter('environment.defaults') ? $container->getParameter('environment.defaults') : array();
+    $env_default_user = $container->hasParameter('environment') ? $container->getParameter('environment') : array();
     $merged_env = array_merge(
         $env_default_app,       # application defaults
         $env_default_user,      # user defaults
