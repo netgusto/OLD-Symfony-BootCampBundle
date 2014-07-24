@@ -3,8 +3,9 @@
 namespace Netgusto\BootCampBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Netgusto\DevServerBundle\NetgustoDevServerBundle;
-use Netgusto\AutorouteBundle\NetgustoAutorouteBundle;
+
+use Netgusto\DevServerBundle\NetgustoDevServerBundle,
+    Netgusto\AutorouteBundle\NetgustoAutorouteBundle;
 
 class NetgustoBootCampBundle extends Bundle
 {
