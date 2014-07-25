@@ -18,16 +18,13 @@ class WelcomeStep2Type extends AbstractType {
 
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $builder
-            ->add('email', 'text', array(
-                'label' => 'Email',
-                'attr' => array('placeholder' => 'Email'),
+            ->add('username', 'text', array(
+                'label' => 'Username',
+                'attr' => array('placeholder' => 'Username'),
                 'constraints' => array(
                     new NotBlank(array(
-                        'message' => 'Please, give your email address.'
+                        'message' => 'Please, provide your username.'
                     )),
-                    new Email(array(
-                        'message' => 'This email is not valid.'
-                    ))
                 )
             ))
             ->add('password', 'repeated', array(

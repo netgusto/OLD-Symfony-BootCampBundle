@@ -19,18 +19,19 @@ class BootCampExtension extends \Twig_Extension {
 
     public function getFunctions() {
         return array(
-            'siteconfig' => new \Twig_SimpleFunction('siteconfig', array($this, 'siteconfig')),
             'config' => new \Twig_SimpleFunction('config', array($this, 'config')),
         );
     }
 
-    public function siteconfig() {
-        return $this->container->get('config.site');
-    }
+    # Returns the config Service, not the ConfigContainer entity
+    public function config($configname = null) {
 
-    public function config($configname) {
-        if(!preg_match('/^[a-z0-9\.]+$/i', $configname)) {
+        if(!is_null($configname) && !preg_match('/^[a-z0-9\.]+$/i', $configname)) {
             throw new \Exception("Cannot access requested config in BootCamp Twig extension.");
+        }
+
+        if(is_null($configname)) {
+            $configname = 'main';
         }
 
         return $this->container->get('config.' . $configname);

@@ -43,6 +43,12 @@ services:
             - %bootcamp.userinit.mapping.password%
             - %bootcamp.userinit.mapping.salt%
 
+    bootcamp.default_config_init_handler:
+        class: Netgusto\BootCampBundle\Services\ConfigInitHandler\DefaultConfigInitHandler
+        arguments:
+            - @doctrine.orm.entity_manager
+            - %bootcamp.initconfig.file%
+
     scalar.interpreter:
         class: Netgusto\BootCampBundle\Services\ScalarInterpreterService
 
@@ -70,12 +76,18 @@ services:
         class: Netgusto\BootCampBundle\Services\Config\Loader\DbBackedConfigLoaderService
         arguments:
             - @doctrine.orm.entity_manager
-            - { data.dir: '' }
+            - Netgusto\BootCampBundle\Entity\ConfigContainer
 
-    config.site:
-        class: %bootcamp.initconfig.class%
+    bootcamp.config.main:
+        class: Netgusto\BootCampBundle\Services\Config\DefaultConfigService
         arguments:
-            - @=service('config.loader.dbbacked').load('config.site')
+            - @doctrine.orm.entity_manager
+        calls:
+            - [ "initialize", [ "@=service('config.loader.dbbacked').load('main')" ] ]
+
+    # config.main is aliased in Netgusto\BootCampBundle\DependencyInjection\NetgustoBootCampExtension (cannot use %parameter% in alias)
+    #config.main:
+    #    alias: %bootcamp.config.service%
 
     initialization.controller:
         class: Netgusto\BootCampBundle\Controller\InitializationController

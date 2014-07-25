@@ -7,31 +7,22 @@ use Doctrine\ORM\EntityManager;
 class DbBackedConfigLoaderService extends AbstractConfigLoaderService {
 
     protected $em;
+    protected $configcontainerclass;
     protected $parameters;
 
-    public function __construct(EntityManager $em, $parameters) {
+    public function __construct(EntityManager $em, $configcontainerclass, $parameters = array()) {
         $this->em = $em;
-        $this->parameters = $this->prepareParameters($parameters);
+        $this->configcontainerclass = $configcontainerclass;
     }
 
     public function load($configname) {
         
-        $configEntity = $this->em->getRepository('Netgusto\BootCampBundle\Entity\HierarchicalConfig')->findOneByName($configname);
+        $configEntity = $this->em->getRepository($this->configcontainerclass)->findOneByName($configname);
         
         if(!$configEntity) {
             return null;
         }
 
-        $config = $configEntity->getConfig();
-        if(is_null($config)) {
-            return null;
-        }
-
-        $keys = array_keys($config);
-        foreach($keys as $key) {
-            $config[$key] = $this->doReplacements($config[$key]);
-        }
-
-        return $config;
+        return $configEntity;
     }
 }

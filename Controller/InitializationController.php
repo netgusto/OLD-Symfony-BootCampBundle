@@ -19,7 +19,7 @@ use Netgusto\BootCampBundle\Exception as BootCampException,
     Netgusto\BootCampBundle\Services as BootCampServices,
     Netgusto\BootCampBundle\Form\Type as FormType,
     Netgusto\BootCampBundle\Entity\SystemStatus,
-    Netgusto\BootCampBundle\Entity\HierarchicalConfig,
+    Netgusto\BootCampBundle\Entity\ConfigContainer,
     Netgusto\BootCampBundle\Services\UserInitHandler\UserInitHandlerInterface;
 
 class InitializationController {
@@ -326,7 +326,7 @@ class InitializationController {
             $this->createDatabase($em->getConnection());
             $this->createSchema($em);
             $this->createSystemStatus($em, $this->container->getParameter('bootcamp.appversion'));
-            $this->createSiteConfig($em, $this->environment);
+            $this->createConfig($em, $this->environment);
 
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
         }
@@ -352,7 +352,7 @@ class InitializationController {
             # The schemas are created
             $this->createSchema($em);
             $this->createSystemStatus($em, $this->container->getParameter('bootcamp.appversion'));
-            $this->createSiteConfig($em, $this->environment);
+            $this->createConfig($em, $this->environment);
 
             return new RedirectResponse($this->urlgenerator->generate('_init_step2'));
         }
@@ -395,7 +395,7 @@ class InitializationController {
 
             $data = $form->getData();
             $user = $userInitHandlerService->createAndPersistUser(
-                $data['email'],
+                $data['username'],
                 $data['password']
             );
 
@@ -455,16 +455,15 @@ class InitializationController {
         $em->flush();
     }
 
-    protected function createSiteConfig(EntityManager $em, BootCampServices\Context\EnvironmentService $environment) {
+    protected function createConfig(EntityManager $em, BootCampServices\Context\EnvironmentService $environment) {
 
-        #$configfile = $rootdir . '/data/config/config.yml';
         $configfile = $this->container->getParameter('bootcamp.initconfig.file');
         if(!file_exists($configfile)) {
             throw new \Exception('Initialization config file does not exist (looked in ' . $configfile . ').', 500);
         }
 
-        $siteconfig = new HierarchicalConfig();
-        $siteconfig->setName('config.site');
+        $siteconfig = new ConfigContainer();
+        $siteconfig->setName('main');
         $siteconfig->setConfig(
             Yaml::parse($configfile)
         );

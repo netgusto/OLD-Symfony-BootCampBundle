@@ -15,10 +15,10 @@
 
         {{ form_start(form, { 'attr': { 'class': 'pure-form pure-form-aligned', 'autocomplete': 'off', 'novalidate': 'novalidate' }}) }}
             <fieldset>
-                <div class="pure-control-group{% if form.email.vars.errors|length %} has-error{% endif %}">
-                    {{ form_label(form.email, label|default(null)) }}
-                    {{ form_widget(form.email) }}
-                    {% if not form.email.vars.valid %}<span class="help-block">{{ form.email.vars.errors[0].getMessage() }}</span>{% endif %}
+                <div class="pure-control-group{% if form.username.vars.errors|length %} has-error{% endif %}">
+                    {{ form_label(form.username, label|default(null)) }}
+                    {{ form_widget(form.username) }}
+                    {% if not form.username.vars.valid %}<span class="help-block">{{ form.username.vars.errors[0].getMessage() }}</span>{% endif %}
                 </div>
 
                 {% for passwordField in form.password %}

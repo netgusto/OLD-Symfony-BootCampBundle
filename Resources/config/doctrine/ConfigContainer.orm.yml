@@ -1,4 +1,4 @@
-Netgusto\BootCampBundle\Entity\HierarchicalConfig:
+Netgusto\BootCampBundle\Entity\ConfigContainer:
     type: entity
     table: ~
     fields:

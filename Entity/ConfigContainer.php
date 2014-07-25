@@ -2,7 +2,7 @@
 
 namespace Netgusto\BootCampBundle\Entity;
 
-class HierarchicalConfig {
+class ConfigContainer implements ConfigContainerInterface {
     /**
      * @var integer
      */
@@ -17,7 +17,6 @@ class HierarchicalConfig {
      * @var array
      */
     private $config;
-
 
     /**
      * Get id
@@ -58,7 +57,7 @@ class HierarchicalConfig {
      * @param array $config
      * @return HierarchicalConfig
      */
-    public function setConfig($config)
+    public function setConfig(array $config)
     {
         $this->config = $config;
 
@@ -73,5 +72,24 @@ class HierarchicalConfig {
     public function getConfig()
     {
         return $this->config;
+    }
+
+    public function has($prop) {
+        return array_key_exists($prop, $this->config);
+    }
+
+    public function get($prop) {
+        
+        if(!$this->has($prop)) {
+            throw new \RuntimeException('ConfigContainer: attempt to access undefined config property "' . $prop . '"');
+        }
+
+        return $this->config[$prop];
+    }
+
+    public function set($prop, $value) {
+        $this->config[$prop] = $value;
+
+        return $this;
     }
 }
