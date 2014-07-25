@@ -31,6 +31,18 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
 
+    bootcamp.default_user_init_handler:
+        class: Netgusto\BootCampBundle\Services\UserInitHandler\DefaultUserInitHandler
+        arguments:
+            - @doctrine.orm.entity_manager
+            - @security.encoder_factory
+            - %bootcamp.userinit.class%
+            - %bootcamp.userinit.roles%
+            - %bootcamp.userinit.mapping.username%
+            - %bootcamp.userinit.mapping.roles%
+            - %bootcamp.userinit.mapping.password%
+            - %bootcamp.userinit.mapping.salt%
+
     scalar.interpreter:
         class: Netgusto\BootCampBundle\Services\ScalarInterpreterService
 

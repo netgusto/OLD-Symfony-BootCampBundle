@@ -19,7 +19,8 @@ use Netgusto\BootCampBundle\Exception as BootCampException,
     Netgusto\BootCampBundle\Services as BootCampServices,
     Netgusto\BootCampBundle\Form\Type as FormType,
     Netgusto\BootCampBundle\Entity\SystemStatus,
-    Netgusto\BootCampBundle\Entity\HierarchicalConfig;
+    Netgusto\BootCampBundle\Entity\HierarchicalConfig,
+    Netgusto\BootCampBundle\Services\UserInitHandler\UserInitHandlerInterface;
 
 class InitializationController {
 
@@ -376,38 +377,27 @@ class InitializationController {
         $form->handleRequest($request);
         if($form->isValid()) {
 
-            $userclass = $this->container->getParameter('bootcamp.userinit.class');
-            
-            $usernameProp = $this->container->getParameter('bootcamp.userinit.mapping.username');
-            $rolesProp = $this->container->getParameter('bootcamp.userinit.mapping.roles');
-            $passwordProp = $this->container->getParameter('bootcamp.userinit.mapping.password');
-            $saltProp = $this->container->getParameter('bootcamp.userinit.mapping.salt');
+            if(!$this->container->hasParameter('bootcamp.userinit.handler')) {
+                throw new \RuntimeException('Bootcamp: missing parameter bootcamp.userinit.handler');
+            }
 
-            $usernameSetter = 'set' . ucfirst($usernameProp);
-            $rolesSetter = 'set' . ucfirst($rolesProp);
-            $passwordSetter = 'set' . ucfirst($passwordProp);
-            $saltSetter = 'set' . ucfirst($saltProp);
+            $userInitHandlerServiceId = $this->container->getParameter('bootcamp.userinit.handler');
+
+            if(!$this->container->has($userInitHandlerServiceId)) {
+                throw new \RuntimeException('Bootcamp: Service ' . $userInitHandlerServiceId . ' does not exist.');
+            }
+
+            $userInitHandlerService = $this->container->get($userInitHandlerServiceId);
+
+            if(!$userInitHandlerService instanceOf UserInitHandlerInterface) {
+                throw new \RuntimeException('Bootcamp: Service ' . $userInitHandlerServiceId . ' must implement Netgusto\BootCampBundle\Services\UserInitHandler\UserInitHandlerInterface.');
+            }
 
             $data = $form->getData();
-            $user = new $userclass();
-            $salt = md5(rand() . microtime());
-
-            $user->$usernameSetter($data['email']);
-            $user->$saltSetter($salt);
-            $user->$rolesSetter($this->container->getParameter('bootcamp.userinit.roles'));
-            $user->$passwordSetter(
-                $this->passwordencoder_factory
-                    ->getEncoder($user)
-                    ->encodePassword(
-                        $data['password'],
-                        $salt
-                    )
+            $user = $userInitHandlerService->createAndPersistUser(
+                $data['email'],
+                $data['password']
             );
-
-            $em = $this->container->get('doctrine.orm.entity_manager');
-
-            $em->persist($user);
-            $em->flush();
 
             # We mark the application as initialized
             $this->systemstatus->setInitialized(TRUE);

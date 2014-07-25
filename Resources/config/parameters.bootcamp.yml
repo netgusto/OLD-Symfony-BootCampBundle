@@ -6,7 +6,8 @@ parameters:
     bootcamp.initconfig.file: "%kernel.root_dir%/../vendor/netgusto/bootcamp-bundle/Ressources/config/initconfig.empty.yml"
     
     bootcamp.userinit.enabled: false
-    #bootcamp.userinit.class: "Netgusto\HelloBundle\Entity\AppUser"
+    bootcamp.userinit.handler: bootcamp.default_user_init_handler
+    bootcamp.userinit.class: ~
     bootcamp.userinit.roles: ["ROLE_ADMIN"]
     bootcamp.userinit.mapping.username: "username"
     bootcamp.userinit.mapping.roles: "roles"
